@@ -1,6 +1,7 @@
 function start(placeId, port, url)
 ------------------- UTILITY FUNCTIONS --------------------------
 
+
 function waitForChild(parent, childName)
 	while true do
 		local child = parent:findFirstChild(childName)
@@ -45,7 +46,7 @@ if url~=nil then
 	pcall(function() game:GetService("Players"):SetAbuseReportUrl(url .. "/AbuseReport/InGameChatHandler.ashx") end)
 	pcall(function() game:GetService("ScriptInformationProvider"):SetAssetUrl(url .. "/Asset/") end)
 	pcall(function() game:GetService("ContentProvider"):SetBaseUrl(url .. "/") end)
-	--pcall(function() game:GetService("Players"):SetChatFilterUrl(url .. "/Game/ChatFilter.ashx") end)
+	pcall(function() game:GetService("Players"):SetChatFilterUrl(url .. "/Game/ChatFilter.ashx") end)
 
 	game:GetService("BadgeService"):SetPlaceId(placeId)
 
@@ -73,74 +74,23 @@ settings().Diagnostics.LuaRamLimit = 0
 
 
 game:GetService("Players").PlayerAdded:connect(function(player)
-    print("Player " .. player.userId .. " added")
-
-    player.Chatted:connect(function(message)
-        print(player.Name .. " said: " .. message)
-    end)
+	print("Player " .. player.userId .. " added")
 end)
 
 game:GetService("Players").PlayerRemoving:connect(function(player)
-    print("Player " .. player.userId .. " leaving")
+	print("Player " .. player.userId .. " leaving")
 end)
 
-
-if placeId ~= nil and url ~= nil then
-    print("[Loader] Place ID and URL are valid.")
-    wait()
-    print("[Loader] loading game...")
-    game:Load("rbxasset://1.rbxl")
-
-    print("[Loader] loading camera...")
-    local success, model = pcall(function()
-        return game:GetObjects("rbxasset://camera.rbxmx")[1]
-    end)
-
-    if success and model then
-		local starterPlayer = game:GetService("StarterPlayer")
-        local starterScripts = starterPlayer:FindFirstChild("StarterPlayerScripts") or starterPlayer:FindFirstChild("StarterCharacterScripts")
-        
-        if not starterScripts then
-            print("[Loader] StarterPlayerScripts not found, creating...")
-            starterScripts = Instance.new("Folder")
-            starterScripts.Name = "StarterPlayerScripts"
-            starterScripts.Parent = starterPlayer
-        else
-            print("[Loader] Found StarterPlayerScripts.")
-        end
-
-        for _, child in pairs(model:GetChildren()) do
-            if child:IsA("LocalScript") or child:IsA("Script") or child:IsA("ModuleScript") or child:IsA("Folder") then
-                child.Parent = starterScripts
-            else
-                print("[Loader] skipped", child.Name, "because it is", child.ClassName)
-            end
-        end
-
-        model.Parent = starterScripts
-
-        print("\n[Loader] StarterPlayerScripts tree:")
-
-        local function printdec(object, indent)
-            indent = indent or ""
-            print(indent .. "- " .. object.Name .. " (" .. object.ClassName .. ")")
-            for _, child in ipairs(object:GetChildren()) do
-                printdec(child, indent .. "    ")
-            end
-        end
-
-        printdec(starterScripts)
-
-        print("[Loader] Finished loading")
-    else
-        warn("[Loader] Failed to load camera.rbxmx:", model)
-    end
-else
-    warn("[Loader] Place id or url is nil, cannot continue")
+if placeId~=nil and url~=nil then
+	-- yield so that file load happens in the heartbeat thread
+	wait()
+	
+	-- load the game
+	game:Load(url .. "/asset/?id=" .. placeId)
 end
 
 -- Now start the connection
-ns:Start(50) 
+ns:Start(port) 
 
 
 scriptContext:SetTimeout(10)
@@ -157,3 +107,4 @@ game:GetService("RunService"):Run()
 
 
 end
+

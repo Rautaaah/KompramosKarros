@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createUseStyles } from "react-jss";
+import { getTheme, themeType } from "../../services/theme";
 import AuthenticationStore from "../../stores/authentication";
 import NavigationStore from "../../stores/navigation";
 import LinkEntry from "./components/linkEntry";
@@ -33,17 +34,25 @@ const useNavSideBarStyles = createUseStyles({
   },
   upgradeNowButton: {
     marginTop: '10px',
-    background: '#01a2fd',
+    background: p => {
+      if (p.theme === themeType.obc2016) return '#1f1f22';
+      if (p.theme === themeType.dark) return '#1f3554';
+      return '#2b5f9e';
+    },
     fontSize: '15px',
     fontWeight: 500,
     width: '100%',
     paddingTop: '8px',
     paddingBottom: '8px',
     textAlign: 'center',
-    color: 'white',
+    color: p => p.theme === themeType.obc2016 ? 'white' : 'white',
     borderRadius: '4px',
     '&:hover': {
-      background: '#3ab8ff',
+      background: p => {
+        if (p.theme === themeType.obc2016) return '#2a2a2f';
+        if (p.theme === themeType.dark) return '#29466d';
+        return '#3870b4';
+      },
     },
   },
 });
@@ -53,13 +62,21 @@ const NavSideBar = props => {
   const navStore = NavigationStore.useContainer();
   const mainNavBarRef = props.mainNavBarRef;
   const [avatarMenu, setAvatarMenu] = useState('R15');
-  const [dimensions, setDimensions] = useState({
-    height: window.innerHeight,
-    width: window.innerWidth
-  });
+  const getWindowDimensions = () => {
+    if (typeof window === 'undefined') {
+      return { height: 0, width: 1920 };
+    }
+    return {
+      height: window.innerHeight,
+      width: window.innerWidth,
+    };
+  };
+  const [dimensions, setDimensions] = useState(getWindowDimensions);
   const [userData, setUserData] = useState(null);
   const [pendingCount, setPendingCount] = useState(0);
-  const s = useNavSideBarStyles();
+  const s = useNavSideBarStyles({
+    theme: getTheme(),
+  });
   
   useEffect(() => {
     const menuType = localStorage.getItem('rbx_avatarmenu_type');
@@ -67,12 +84,13 @@ const NavSideBar = props => {
         setAvatarMenu(menuType);
       }
 
-    window.addEventListener('resize', () => {
-      setDimensions({
-        height: window.innerHeight,
-        width: window.innerWidth
-      });
-    });
+    const onResize = () => {
+      setDimensions(getWindowDimensions());
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', onResize);
+      onResize();
+    }
     
     const getStaffData = async () => {
       try {
@@ -110,7 +128,9 @@ const NavSideBar = props => {
     getStaffData();
     
     return () => {
-      window.removeEventListener('resize', () => {});
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('resize', onResize);
+      }
     };
   }, []);
   
@@ -136,7 +156,7 @@ const NavSideBar = props => {
       <LinkEntry name='Groups' url='/My/Groups.aspx' icon='icon-nav-group' />
       <LinkEntry name='Forums' url='/Forum/Default.aspx' icon='icon-nav-forum' />
       {userData?.isStaff && <LinkEntry name='Admin' url='/admin' icon='icon-nav-friends' count={pendingCount} />}
-	  <LinkEntry name='Trello' url='https://trello.com/b/EuDe6QMM/bubbablox' icon='icon-nav-blog' />
+	  <LinkEntry name='Promocodes' url='/promocodes' icon='icon-nav-blog' />
       <a href='/BuildersClub/Upgrade.ashx'><p className={s.upgradeNowButton}>Upgrade Now</p></a>
     </div>
   </div>

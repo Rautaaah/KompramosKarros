@@ -30,7 +30,7 @@ const BuildersClub = () => {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
 
-    const iframe = `${getBaseUrl()}/UnsecuredContent/buildersclub.html`;
+    const iframe = `${getBaseUrl()}/UnsecuredContent/buildersclub.html?v=zekoro-bc-20260402`;
     setIframeSrc(iframe);
 
     return () => {
@@ -43,7 +43,7 @@ const BuildersClub = () => {
       <iframe
         className={classes.iframe}
         src={iframeSrc}
-        title="Builders Club - BubbaBlox"
+      title="Builders Club - Zekoro"
         onError={(e) => {
           console.error("iframe failed to load:", e);
         }}

@@ -132,6 +132,17 @@ public class FrontendProxyMiddleware
             }.ToString();
         }
 #endif
+        // Never cache HTML shell pages. This prevents stale page/chunk mismatches after deploys.
+        if ((contentType ?? "").Contains("text/html", StringComparison.OrdinalIgnoreCase))
+        {
+            ctx.Response.Headers.CacheControl = new CacheControlHeaderValue()
+            {
+                NoStore = true,
+                NoCache = true,
+                MustRevalidate = true,
+                MaxAge = TimeSpan.Zero,
+            }.ToString();
+        }
         // tell cloudflare to STOP CACHING 404 ERRORS ON NEW NEXTJS FILES!!!!!
         if (statusCode == 404 || (statusCode > 499 && statusCode < 599))
         {
@@ -215,9 +226,12 @@ public class FrontendProxyMiddleware
 			var locationHeader = result.Headers.Location?.ToString();
 			var statusCode = (int)result.StatusCode;
 
-			var cacheable = contentType != null && result.IsSuccessStatusCode && (
-				contentType.Contains("application/javascript") ||
-				contentType.Contains("text/html"));
+			var cacheable = contentType != null &&
+                            result.IsSuccessStatusCode &&
+                            requestUrl.StartsWith("/_next/", StringComparison.OrdinalIgnoreCase) &&
+                            (contentType.Contains("application/javascript", StringComparison.OrdinalIgnoreCase) ||
+                             contentType.Contains("text/javascript", StringComparison.OrdinalIgnoreCase) ||
+                             contentType.Contains("text/css", StringComparison.OrdinalIgnoreCase));
 				
 			if (requestUrl.ToLower().StartsWith("/forum/"))
 				cacheable = false;

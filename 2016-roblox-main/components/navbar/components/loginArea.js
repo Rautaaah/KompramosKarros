@@ -4,10 +4,11 @@ import LoginModalStore from "../../../stores/loginModal";
 import LoginModal from "../../loginModal";
 import getFlag from "../../../lib/getFlag";
 import {useRouter} from "next/dist/client/router";
+import { getTheme, themeType } from "../../../services/theme";
 
 const useLoginAreaStyles = createUseStyles({
   text: {
-    color: 'white',
+    color: p => p.theme === themeType.obc2016 ? 'white' : 'white',
     fontWeight: 400,
     fontSize: '16px',
     borderBottom: 0,
@@ -17,11 +18,11 @@ const useLoginAreaStyles = createUseStyles({
     whiteSpace: 'nowrap',
   },
   link: {
-    color: 'white',
+    color: p => p.theme === themeType.obc2016 ? 'white' : 'white',
     textDecoration: 'none',
     padding: '4px 8px',
     '&:hover': {
-      color: 'white',
+      color: p => p.theme === themeType.obc2016 ? 'white' : 'white',
       background: 'rgba(25,25,25,0.1)',
       cursor: 'pointer',
       borderRadius: '4px',
@@ -31,7 +32,9 @@ const useLoginAreaStyles = createUseStyles({
 
 const LoginArea = props => {
   const Router = useRouter();
-  const s = useLoginAreaStyles();
+  const s = useLoginAreaStyles({
+    theme: getTheme(),
+  });
   const loginModalStore = LoginModalStore.useContainer();
 
   return <div className='row'>

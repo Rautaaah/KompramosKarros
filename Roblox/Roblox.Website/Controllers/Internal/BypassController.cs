@@ -138,7 +138,7 @@ namespace Roblox.Website.Controllers
         }
 		
 		[HttpPostBypass("buildersclub/membership")]
-		public async Task<dynamic> UpdateMembership([Required, MVC.FromForm] string membershipType)
+		public async Task<dynamic> UpdateMembership([Required, MVC.FromForm] string membershipType, [MVC.FromServices] NpgsqlConnection db)
 		{
 			if (userSession == null)
 				throw new RobloxException(401, 0, "Not authenticated");
@@ -151,6 +151,34 @@ namespace Roblox.Website.Controllers
 
 			await services.users.InsertOrUpdateMembership(userSession.userId, MembershipTypeParsed);
 			var metadata = MembershipMetadata.GetMetadata(MembershipTypeParsed);
+			long? membershipHatAssetId = MembershipTypeParsed switch
+			{
+				MembershipType.BuildersClub => 219,
+				MembershipType.TurboBuildersClub => 220,
+				MembershipType.OutrageousBuildersClub => 221,
+				_ => null,
+			};
+
+			if (membershipHatAssetId.HasValue)
+			{
+				if (db.State != ConnectionState.Open)
+				{
+					await db.OpenAsync();
+				}
+
+				await db.ExecuteAsync(
+					"INSERT INTO user_asset (user_id, asset_id) " +
+					"SELECT @userId, @assetId " +
+					"WHERE NOT EXISTS (" +
+					"SELECT 1 FROM user_asset WHERE user_id = @userId AND asset_id = @assetId" +
+					")",
+					new
+					{
+						userId = userSession.userId,
+						assetId = membershipHatAssetId.Value,
+					});
+			}
+
 			switch (MembershipTypeParsed)
 			{
 				case MembershipType.OutrageousBuildersClub:

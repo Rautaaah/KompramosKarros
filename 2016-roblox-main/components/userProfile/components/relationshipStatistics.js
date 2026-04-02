@@ -25,13 +25,14 @@ const useStyles = createUseStyles({
 });
 
 const RelationshipStatistics = props => {
-  const { id, label, value, userId } = props;
+  const { id, label, value, userId, href } = props;
   const s = useStyles();
+  const targetHref = href || `/users/${userId}/friends#!${id}`;
 
   return <div className='col-12 col-lg-2'>
     <p className={s.statHeader}>{label}</p>
     <p className={s.statValue}>
-      <Link href={`/users/${userId}/friends#!${id}`}>
+      <Link href={targetHref}>
         <a>
           {Number.isSafeInteger(value) ? abbreviateNumber(value) : '...'}
         </a>

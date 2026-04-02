@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.Collections.Concurrent;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
@@ -23,14 +24,38 @@ using Roblox.Website.WebsiteModels.Asset;
 using Roblox.Libraries.RobloxApi;
 using Roblox.Libraries.Assets;
 using Roblox.Website.Lib;
-using System.Diagnostics;
 
 namespace Roblox.Website.Controllers 
 {
     [MVC.ApiController]
     [MVC.Route("/")]
     public class Assets : ControllerBase 
-    {		
+    {
+        private static readonly ConcurrentDictionary<long, DateTime> missingRccAssetCache = new();
+        private static readonly TimeSpan missingRccAssetCooldown = TimeSpan.FromMinutes(30);
+
+        private static bool IsRecentlyMissingRccAsset(long assetId)
+        {
+            if (!missingRccAssetCache.TryGetValue(assetId, out var missingAt))
+                return false;
+
+            if (DateTime.UtcNow - missingAt <= missingRccAssetCooldown)
+                return true;
+
+            missingRccAssetCache.TryRemove(assetId, out _);
+            return false;
+        }
+
+        private static void MarkMissingRccAsset(long assetId)
+        {
+            missingRccAssetCache[assetId] = DateTime.UtcNow;
+        }
+
+        private MVC.ActionResult MissingRccAssetResult()
+        {
+            return StatusCode(404, "NotFound");
+        }
+
 	    [HttpGet("asset/shader")]
         public async Task<MVC.ActionResult> GetShaderAsset(long id)
         {
@@ -114,13 +139,18 @@ namespace Roblox.Website.Controllers
 			return badheaders.Contains(headername);
 		}
 
-        [HttpGetBypass("v2/asset")]
+		[HttpGetBypass("v2/asset")]
         [HttpGetBypass("v1/asset")]
         [HttpGetBypass("asset")]
         [HttpPostBypass("v1/asset")]
         [HttpPostBypass("asset")]
 		public async Task<MVC.ActionResult> GetAssetById(long id, [MVC.FromQuery] string? apiKey = null, [MVC.FromQuery(Name = "assetversionid")] long? assetVersionId = null)
         {
+            if (IsRcc() && IsRecentlyMissingRccAsset(id))
+            {
+                return MissingRccAssetResult();
+            }
+
 			var CachedRobloxAsset = await GetCachedAsset(id);
 			if (CachedRobloxAsset != null)
 			{
@@ -137,7 +167,11 @@ namespace Roblox.Website.Controllers
 			{
 				var latestVersionSecret = await services.assets.GetLatestAssetVersion(id);
 				if (latestVersionSecret?.contentUrl == null)
-					throw new RobloxException(400, 0, "Content URL is null");
+				{
+					MarkMissingRccAsset(id);
+					Console.WriteLine($"[asset] missing RCC/render asset id={id}, returning 404");
+					return MissingRccAssetResult();
+				}
 
 				var assetContentSecret = await services.assets.GetAssetContent(latestVersionSecret.contentUrl);
 				return base.File(assetContentSecret, "application/binary");
@@ -230,6 +264,12 @@ namespace Roblox.Website.Controllers
 						}
 						else
 						{
+							if (IsRcc())
+							{
+								MarkMissingRccAsset(assetId);
+								Console.WriteLine($"[asset] RCC fallback missing id={assetId}, status={response.StatusCode}, returning 404");
+								return MissingRccAssetResult();
+							}
 							throw new RobloxException(400, 0, $"{response.StatusCode}");
 						}
 					}
@@ -237,7 +277,19 @@ namespace Roblox.Website.Controllers
 					{				
 						if (ex is TaskCanceledException && !ex.Message.Contains("canceled"))
 						{
+							if (IsRcc())
+							{
+								MarkMissingRccAsset(assetId);
+								Console.WriteLine($"[asset] RCC fallback timeout id={assetId}, returning 404");
+								return MissingRccAssetResult();
+							}
 							throw new RobloxException(400, 0, "Timeout");
+						}
+						if (IsRcc())
+						{
+							MarkMissingRccAsset(assetId);
+							Console.WriteLine($"[asset] RCC fallback exception id={assetId}: {ex.Message}. Returning 404");
+							return MissingRccAssetResult();
 						}
 						
 						throw new RobloxException(400, 0, $"{ex.Message}");

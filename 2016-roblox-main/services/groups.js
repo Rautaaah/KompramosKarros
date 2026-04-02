@@ -94,6 +94,12 @@ export const setGroupDescription = ({groupId, description}) => {
   });
 }
 
+export const setGroupName = ({groupId, name}) => {
+  return request('PATCH', getFullUrl('groups', `/v1/groups/${groupId}/name`), {
+    name,
+  });
+}
+
 export const getGroupSettings = ({groupId}) => {
   return request('GET', getFullUrl('groups', `/v1/groups/${groupId}/settings`)).then(d => d.data);
 }

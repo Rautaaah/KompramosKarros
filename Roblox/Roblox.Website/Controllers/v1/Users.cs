@@ -25,7 +25,16 @@ public class UsersControllerV1 : ControllerBase
 	[HttpGet("users/authenticated")]
 	public async Task<IActionResult> GetMySession()
 	{
-		if (userSession is null) throw new UnauthorizedException();
+		if (userSession is null)
+		{
+			return Unauthorized(new
+			{
+				errors = new[]
+				{
+					new { code = 0, message = "Unauthorized" }
+				}
+			});
+		}
 
 		try
 		{
@@ -155,7 +164,10 @@ public class UsersControllerV1 : ControllerBase
 	[HttpGet("user/get-2020-menu")]
 	public async Task<dynamic> Get2020MenuPreference()
 	{
-		if (userSession is null) throw new UnauthorizedException();
+		if (userSession is null)
+		{
+			throw new RobloxException(401, 0, "Unauthorized");
+		}
 
 		try
 		{
@@ -176,7 +188,10 @@ public class UsersControllerV1 : ControllerBase
 	[HttpPatch("user/2020-menu")]
 	public async Task Set2020MenuPreference([Required, FromBody] Set2020MenuPreferenceReq request)
 	{
-		if (userSession is null) throw new UnauthorizedException();
+		if (userSession is null)
+		{
+			throw new RobloxException(401, 0, "Unauthorized");
+		}
 
 		try
 		{

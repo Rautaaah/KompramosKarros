@@ -140,6 +140,33 @@ const GamesPageStore = createContainer(() => {
     });
   }
 
+  const loadDefaultGamesForSearch = async () => {
+    const sortsResponse = await getGameSorts({ gameSortsContext: 'GamesDefaultSorts' });
+    const pendingIconUniverseIds = [];
+    const seenUniverseIds = new Set();
+    const allGames = [];
+
+    await Promise.all(sortsResponse.sorts.map(item => {
+      return getGameList({
+        sortToken: item.token,
+        limit: 100,
+        keyword: '',
+      }).then(response => {
+        response.games.forEach(game => {
+          if (seenUniverseIds.has(game.universeId)) {
+            return;
+          }
+          seenUniverseIds.add(game.universeId);
+          allGames.push(game);
+          pendingIconUniverseIds.push(game.universeId);
+        });
+      });
+    }));
+
+    loadIcons(pendingIconUniverseIds);
+    return allGames;
+  }
+
   const loadGames = ({query, genreFilter}) => {
     setSorts(null);
     setGames(null);
@@ -152,15 +179,29 @@ const GamesPageStore = createContainer(() => {
         limit: 100,
         genre: [],
         keyword: query,
-      }).then(d => {
-        setInfiniteGamesGrid(d);
+      }).then(async d => {
+        let result = d;
 
-        let universeIds = [];
-        for (const item of d.games) {
-          if (!universeIds.includes(item.universeId))
-            universeIds.push(item.universeId);
+        if (!d.games.length) {
+          const fallbackGames = await loadDefaultGamesForSearch();
+          const loweredQuery = query.toLowerCase();
+          result = {
+            ...d,
+            games: fallbackGames.filter(game => {
+              return game.name && game.name.toLowerCase().includes(loweredQuery);
+            }),
+          };
+        } else {
+          const universeIds = [];
+          for (const item of d.games) {
+            if (!universeIds.includes(item.universeId)) {
+              universeIds.push(item.universeId);
+            }
+          }
+          loadIcons(universeIds);
         }
-        loadIcons(universeIds);
+
+        setInfiniteGamesGrid(result);
       })
       return
     }

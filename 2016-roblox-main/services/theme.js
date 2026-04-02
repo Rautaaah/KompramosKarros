@@ -16,7 +16,6 @@ const getTheme = () => {
   return Object.values(themeType).includes(savedTheme) ? savedTheme : themeType.default;
 };
 
-// Janky asf but it works
 const darkmode = () => {
   if (typeof document === 'undefined') return;
 
@@ -31,50 +30,64 @@ const darkmode = () => {
   
   style.textContent = `
     html.dark {
-      background: #121212 !important;
-      color: #ffffff !important;
+      background: #141922 !important;
+      color: #f2f4f8 !important;
     }
-    
-    html.dark *:not(svg):not(svg *):not(img):not([class*="icon"]):not([class*="Icon"]):not(i):not([class*="fa-"]):not([class*="material-icon"]):not([class*="bi-"]) {
-      background: #121212 !important;
-      color: #ffffff !important;
-      border-color: #333 !important;
+
+    html.dark body {
+      background: #141922 !important;
+      color: #f2f4f8 !important;
     }
-    
-    html.dark svg,
-    html.dark svg *,
-    html.dark img,
-    html.dark [class*="icon"],
-    html.dark [class*="Icon"],
-    html.dark i,
-    html.dark [class*="fa-"],
-    html.dark [class*="material-icon"],
-    html.dark [class*="bi-"],
-    html.dark .icon,
-    html.dark .fa,
-    html.dark .material-icons,
-    html.dark .bi {
-      background-color: transparent !important;
-      color: unset !important;
-      border-color: unset !important;
-      fill: unset !important;
-      stroke: unset !important;
+
+    html.dark .card,
+    html.dark .modal-content,
+    html.dark .dropdown-menu,
+    html.dark .table,
+    html.dark .gamesContainer,
+    html.dark .friendsContainer {
+      background: #1b2230 !important;
+      color: #f2f4f8 !important;
+      border-color: #2d3748 !important;
+      box-shadow: 0 1px 4px 0 rgb(0 0 0 / 35%) !important;
     }
-    
-    html.dark svg:not([fill]) {
-      fill: currentColor !important;
+
+    html.dark p,
+    html.dark h1,
+    html.dark h2,
+    html.dark h3,
+    html.dark h4,
+    html.dark h5,
+    html.dark h6,
+    html.dark span,
+    html.dark label,
+    html.dark td,
+    html.dark th,
+    html.dark li,
+    html.dark div {
+      color: inherit;
     }
-    
+
     html.dark a {
       color: #4dabf7 !important;
     }
-    
+
     html.dark input, 
     html.dark textarea, 
     html.dark select {
       background: #1e1e1e !important;
       color: #ffffff !important;
       border-color: #444 !important;
+    }
+
+    html.dark .divider-top,
+    html.dark .divider-bottom,
+    html.dark hr {
+      border-color: #2d3748 !important;
+    }
+
+    html.dark .text-dark,
+    html.dark .text-muted {
+      color: #f2f4f8 !important;
     }
   `;
 };
@@ -89,7 +102,7 @@ const setTheme = (theme) => {
   if (!isLocalStorageAvailable || !Object.values(themeType).includes(theme)) return;
   
   localStorage.setItem('rbx_theme_v1', theme);
-  darkmode(theme);
+  apply(theme);
 };
 
 const apply = (theme) => {
@@ -112,4 +125,4 @@ if (isLocalStorageAvailable && typeof window !== 'undefined') {
   apply(getTheme());
 }
 
-export { themeType, getTheme, setTheme };
+export { themeType, getTheme, setTheme, apply };

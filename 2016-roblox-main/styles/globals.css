@@ -6,6 +6,56 @@ body {
 	font-size: 14px;
 	min-height: 100vh;
 }
+
+html.dark body {
+	background: #141922 !important;
+	color: #e7edf7;
+}
+
+html.dark .section-content,
+html.dark .section-content-off,
+html.dark .card,
+html.dark .container-footer,
+html.dark footer,
+html.dark .modal-content,
+html.dark .dropdown-menu {
+	background-color: #1c2430 !important;
+	color: #e7edf7 !important;
+	border-color: #324257 !important;
+}
+
+html.dark .divider-right,
+html.dark .divider-top,
+html.dark .divider-bottom,
+html.dark .divider-top-thick,
+html.dark .divider-light {
+	border-color: #324257 !important;
+}
+
+html.dark .inputTextStyle,
+html.dark input.form-control,
+html.dark textarea.form-control,
+html.dark select.form-control {
+	background-color: #101722 !important;
+	color: #e7edf7 !important;
+	border-color: #3b4f69 !important;
+}
+
+html.dark a,
+html.dark .fake-link {
+	color: #8fc0ff !important;
+}
+
+html.obc2016 body {
+	background-color: #222224;
+	color: #111;
+}
+
+html.obc2016 .text-light,
+html.obc2016 .text-white,
+html.obc2016 .color-text-secondary {
+	color: #111 !important;
+}
 div#__next > div > div.container {
 	min-height: 100vh;
 }

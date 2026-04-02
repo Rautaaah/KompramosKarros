@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import ActionButton from "../components/actionButton";
 import useButtonStyles from "../styles/buttonStyles";
-import { getFullUrl, getBaseUrl } from '../lib/request';
+import { getFullUrl } from '../lib/request';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -51,7 +51,7 @@ const GroupSearch = () => {
       const response = await fetch(
         getFullUrl('groups', `/v1/groups/search?keyword=${encodeURIComponent(
           keyword
-        )}&maxRows=12&startIndex=0`)
+        )}&limit=12&cursor=0`)
       );
 
       if (!response.ok) {
@@ -134,7 +134,7 @@ const GroupSearch = () => {
               {searchResults.data.map((group) => (
                 <div key={group.id} className="col-md-4 mb-4">
                   <Link 
-                    href={`${getBaseUrl()}/My/Groups.aspx?gid=${group.id}`}
+                    href={`/My/Groups.aspx?gid=${group.id}`}
                     passHref
                     legacyBehavior
                   >

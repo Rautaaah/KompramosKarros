@@ -13,6 +13,11 @@ const useStyles = createUseStyles({
     fontWeight: 400,
     color: '#757575',
   },
+  error: {
+    color: '#111',
+    marginTop: '0.5rem',
+    marginBottom: '1rem',
+  },
 })
 
 const InventoryGrid = props => {
@@ -34,6 +39,7 @@ const InventoryGrid = props => {
         <p className={s.showingLabel}>{myPage ? `Showing ${myPage} to ${store.data.Items.length} of ${total}` : null}</p>
       </div>
       <div className='col-12'>
+        {store.error ? <p className={s.error}>{store.error}</p> : null}
         <div className='row'>
           {store.data ? store.data.Items.map(v => {
               const isLimited = v.AssetRestrictionIcon.CssTag === 'limited';

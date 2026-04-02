@@ -35,14 +35,13 @@ const Games = props => {
   const showSortDropdown = getFlag('gameCustomSortDropdown', false) && !query.keyword;
 
   useEffect(() => {
-    if (query.keyword)
-      store.setQuery(query.keyword);
+    store.setQuery(query.keyword || '');
 
     store.loadGames({
       query: query.keyword,
       genreFilter: store.genreFilter,
     });
-  }, [store.genreFilter]);
+  }, [store.genreFilter, query.keyword]);
 
   // if (!store.sorts || !store.games || !store.icons) return null;
   return <div className={'row ' + (auth.isAuthenticated ? s.authContainer : '')}>

@@ -434,7 +434,7 @@ namespace Roblox.Website.Controllers
         public async Task ReportServerActivity([Required, MVC.FromBody] ReportActivity request)
         {
             CheckServerAuth(request.authorization);
-            await services.gameServer.SetServerPing(request.serverId);
+            await services.gameServer.SetServerPing(request.serverId, request.placeId);
         }
 
 		[HttpPostBypass("/gs/shutdown")]

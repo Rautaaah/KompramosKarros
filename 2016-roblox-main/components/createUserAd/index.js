@@ -45,7 +45,13 @@ const CreateUserAd = props => {
     }
   }
 
-  if (props.targetType !== 'asset' && props.targetType !== 'group') return <p>TargetType is not supported</p>
+  const normalizedTargetType = props.targetType === 'game' || props.targetType === 'place'
+    ? 'game'
+    : props.targetType;
+
+  if (normalizedTargetType !== 'asset' && normalizedTargetType !== 'group' && normalizedTargetType !== 'game') {
+    return <p>TargetType is not supported</p>
+  }
   return <div className={'container ' + s.createUserAdContainer}>
     <div className='row'>
       <div className='col-12'>
@@ -101,7 +107,7 @@ const CreateUserAd = props => {
             file: fileRef.current.files[0],
             name: nameRef.current.value,
             targetId: props.targetId,
-            type: props.targetType,
+            type: normalizedTargetType,
           }).then(() => {
             window.location.href = '/develop?View=8';
           }).catch(e => {

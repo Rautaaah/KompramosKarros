@@ -1,5 +1,6 @@
 import { createUseStyles } from "react-jss";
 import Link from "../../link";
+import { getTheme, themeType } from "../../../services/theme";
 
 const useStyles = createUseStyles({
   container: {
@@ -9,7 +10,7 @@ const useStyles = createUseStyles({
     paddingLeft: '0',
   },
   linkEntry: {
-    color: 'white',
+    color: p => p.theme === themeType.obc2016 ? 'white' : 'white',
     fontWeight: 400,
     marginBottom: 0,
     paddingBottom: 0,
@@ -19,7 +20,7 @@ const useStyles = createUseStyles({
     padding: '4px 8px',
     transition: 'none',
     '&:hover': {
-      color: 'white',
+      color: p => p.theme === themeType.obc2016 ? 'white' : 'white',
       background: 'rgba(25,25,25,0.1)',
       cursor: 'pointer',
       borderRadius: '4px',
@@ -45,7 +46,9 @@ const useStyles = createUseStyles({
 })
 
 const LinkEntry = props => {
-  const s = useStyles();
+  const s = useStyles({
+    theme: getTheme(),
+  });
   const isabsolute = props.url.startsWith('http');
   
   return <div className='col-3'>
@@ -64,7 +67,9 @@ const LinkEntry = props => {
 }
 
 const NavigationLinks = props => {
-  const s = useStyles();
+  const s = useStyles({
+    theme: getTheme(),
+  });
   return <div className={`${s.col} col-10 col-lg-5`}>
     <div className={s.container}>
       <div className='row'>

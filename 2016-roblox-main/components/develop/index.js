@@ -3,7 +3,7 @@ import { createUseStyles } from "react-jss";
 import AdBanner from "../ad/adBanner";
 import OldVerticalTabs from "../oldVerticalTabs";
 import CreationsTab from './components/creationsTab';
-import NotAvailable from "./components/notAvailable";
+import LibraryTab from "./components/libraryTab";
 import authentication from "../../stores/authentication";
 import {getPermissionsForRoleset, getUserGroups} from "../../services/groups";
 
@@ -74,14 +74,10 @@ const Develop = props => {
         name: 'Group Creations',
         element: <CreationsTab id={props.id} group={true} groupId={groupId} groups={groups} setGroupId={setGroupId} />,
       },
-/*       {
-        name: 'Library',
-        element: <NotAvailable />,
-      },
       {
-        name: 'Developer Exchange',
-        element: <NotAvailable />,
-      }, */
+        name: 'Library',
+        element: <LibraryTab />,
+      },
     ];
     if (tab === null)
       setTab(defaultOpts[0].name);

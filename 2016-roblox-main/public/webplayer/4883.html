@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zekoro Web Player</title>
+  <style>
+    html, body {
+      background: #000;
+      margin: 0;
+      padding: 0;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+    #canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 10;
+    }
+    #launcher {
+      max-width: 520px;
+      margin: 24px auto;
+      padding: 16px;
+    }
+    .row {
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #d8d8d8;
+    }
+    select, button {
+      font-size: 24px;
+      padding: 4px 10px;
+    }
+    button {
+      cursor: pointer;
+      background: #32eb57;
+      border: none;
+      border-radius: 4px;
+      font-size: 34px;
+      margin-top: 8px;
+    }
+    #status {
+      margin-top: 12px;
+      color: #d0d0d0;
+      min-height: 20px;
+      font-size: 14px;
+    }
+    .err {
+      color: #ff6565;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div id="launcher">
+    <div class="row">
+      <label for="yearSelect">Core Script Year</label>
+      <select id="yearSelect">
+        <option value="2016" selected>2016 (default)</option>
+        <option value="2014">2014</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="touchSelect">Touch Controls</label>
+      <select id="touchSelect">
+        <option value="false">Disabled</option>
+        <option value="true">Enabled</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="msaaSelect">MSAA</label>
+      <select id="msaaSelect">
+        <option value="0">No MSAA</option>
+        <option value="2">2x MSAA</option>
+        <option value="4">4x MSAA</option>
+        <option value="8" selected>8x MSAA</option>
+      </select>
+    </div>
+    <button id="startButton" type="button">Click to Start Game</button>
+    <p id="status"></p>
+  </div>
+  <script src="/webplayer/launcher.js?v=20260402b"></script>
+</body>
+</html>

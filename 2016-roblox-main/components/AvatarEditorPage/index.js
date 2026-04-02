@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 import OutfitsTab from "./components/outfitsTab";
 import BodyColorsTab from "./components/bodyColorsTab";
 import { useRouter } from "next/router";
+import { getTheme, themeType } from "../../services/theme";
 
 const useStyles = createUseStyles({
     sliderInput: {
@@ -30,6 +31,7 @@ const useStyles = createUseStyles({
         fontWeight: 500,
         padding: "15px 0",
         margin: 0,
+        color: p => p.theme === themeType.obc2016 ? "#fff" : "inherit",
         "@media(max-width: 576px)": {
             padding: "0 0 10px 0",
             fontSize: 48,
@@ -135,6 +137,7 @@ const useStyles = createUseStyles({
     redrawContainer: {
         "& span": {
             fontSize: 16,
+            color: p => p.theme === themeType.obc2016 ? "#fff" : "inherit",
         }
     },
     redrawBtn: {
@@ -167,13 +170,21 @@ const useStyles = createUseStyles({
             color: 'white !important',
         }
     },
+    topHintText: {
+        color: p => p.theme === themeType.obc2016 ? "#fff" : "inherit",
+    },
+    breadcrumbText: {
+        color: p => p.theme === themeType.obc2016 ? "#fff" : "inherit",
+    },
 });
 
 // REF: https://youtu.be/iXI3aut2UWs
 // REF2: https://youtu.be/pF-jlI9OJGs
 
 function AvatarEditor() {
-    const s = useStyles();
+    const s = useStyles({
+        theme: getTheme(),
+    });
     const buttonStyles = useButtonStyles();
     const auth = AuthenticationStore.useContainer();
     const store = AvatarInfoStore.useContainer();
@@ -256,7 +267,7 @@ function AvatarEditor() {
         <div className={`${s.avatarHeader} flex justify-content-between align-items-center`}>
             <h1 className={s.avatarHeaderText}>Avatar Editor</h1>
             <div className="flex justify-content-center align-items-center" style={{ gap: 12 }}>
-                <span>Explore the catalog to find more clothes!</span>
+                <span className={s.topHintText}>Explore the catalog to find more clothes!</span>
                 <ActionButton label="Get More" className={s.moreBut} buttonStyle={buttonStyles.newBuyButton}
                               onClick={() => {
                                   const router = useRouter();
@@ -293,9 +304,9 @@ function AvatarEditor() {
                                 store?.avRules && store?.bodyScales &&
                                 Object.entries(store.avRules.scales).map(([key, value]) => (
                                     <>
-                                        <div
-                                            style={{ color: store.bodyRigType === "R6" ? "#b8b8b8" : "var(--text-color-primary)" }}
-                                            className="flex justify-content-between">
+                                    <div
+                                        style={{ color: store.bodyRigType === "R6" ? "#b8b8b8" : (getTheme() === themeType.obc2016 ? "#fff" : "var(--text-color-primary)") }}
+                                        className="flex justify-content-between">
                                             <span style={{ color: 'inherit' }}>{CapitalizeVariable(key)}</span>
                                             <span>{Math.round(store.bodyScales[key] * 100)}%</span>
                                         </div>
@@ -577,6 +588,7 @@ function AvatarEditor() {
                                     <div style={{ display: "flex" }}>
                                         <span
                                             style={{ paddingTop: 9, paddingBottom: 4 }}
+                                            className={s.breadcrumbText}
                                         >{CapitalizeVariable(page.selectedList.tab)}
                                             {!IsNullOrEmpty(page?.selectedList?.subTab) && ` > ${CapitalizeVariable(page?.selectedList?.subTab)}`}
                                         </span>
@@ -601,7 +613,7 @@ function AvatarEditor() {
                             Object.entries(store.avRules.scales).map(([key, value]) => (
                                 <>
                                     <div
-                                        style={{ color: store.bodyRigType === "R6" ? "#b8b8b8" : "var(--text-color-primary)" }}
+                                        style={{ color: store.bodyRigType === "R6" ? "#b8b8b8" : (getTheme() === themeType.obc2016 ? "#fff" : "var(--text-color-primary)") }}
                                         className="flex justify-content-between">
                                         <span style={{ color: 'inherit' }}>{CapitalizeVariable(key)}</span>
                                         <span>{Math.round(store.bodyScales[key] * 100)}%</span>

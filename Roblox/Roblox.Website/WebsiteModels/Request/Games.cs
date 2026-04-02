@@ -12,6 +12,7 @@ public class ReportActivity
 {
     public string serverId { get; set; }
     public string authorization { get; set; }
+    public long placeId { get; set; }
 }
 
 public class ReportPlayerActivity

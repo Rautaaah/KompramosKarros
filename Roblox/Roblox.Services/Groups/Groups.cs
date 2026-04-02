@@ -48,16 +48,29 @@ public class GroupsService : ServiceBase, IService
     
     public async Task<IEnumerable<SearchGroupEntry>> SearchGroups(string searchQuery, string? cursor, int limit)
     {
-        searchQuery = FilterKeyword(searchQuery);
         var offset = int.Parse(cursor ?? "0");
+        var searchTerms = Regex.Matches(searchQuery ?? string.Empty, "[a-zA-Z0-9]+")
+            .Select(c => c.Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (searchTerms.Count == 0)
+            return Array.Empty<SearchGroupEntry>();
+
+        var whereClauses = new List<string>();
+        var queryParams = new DynamicParameters();
+        queryParams.Add("limit", limit);
+        queryParams.Add("offset", offset);
+
+        for (var i = 0; i < searchTerms.Count; i++)
+        {
+            var paramName = $"term{i}";
+            whereClauses.Add($"(name ILIKE :{paramName} OR description ILIKE :{paramName})");
+            queryParams.Add(paramName, "%" + searchTerms[i] + "%");
+        }
+
         var result = (await db.QueryAsync<SearchGroupEntry>(
-            "SELECT id, name, description, created_at as created, updated_at as updated FROM \"group\" WHERE name ilike :name LIMIT :limit OFFSET :offset",
-            new
-            {
-                name = searchQuery + "%",
-                limit,
-                offset,
-            })).ToList();
+            $"SELECT id, name, description, created_at as created, updated_at as updated FROM \"group\" WHERE {string.Join(" AND ", whereClauses)} LIMIT :limit OFFSET :offset",
+            queryParams)).ToList();
         foreach (var item in result)
         {
             item.memberCount = await GetMemberCount(item.id);
@@ -1006,6 +1019,20 @@ public class GroupsService : ServiceBase, IService
                         TargetName = entry.post_username,
                     };
                     break;
+                case AuditActionType.Rename:
+                    desc = new
+                    {
+                        OldName = entry.old_name,
+                        NewName = entry.new_name,
+                    };
+                    break;
+                case AuditActionType.ChangeDescription:
+                    desc = new
+                    {
+                        OldDescription = entry.old_description,
+                        NewDescription = entry.new_description,
+                    };
+                    break;
             }
             
             var obj = new
@@ -1209,6 +1236,62 @@ public class GroupsService : ServiceBase, IService
         {
             gid = groupId,
             description = newDescription,
+        });
+    }
+
+    public async Task SetGroupName(long groupId, string newName, long userIdPerformingAction)
+    {
+        newName = newName.Trim();
+        var nameValidationResult = NameValidationRegex.Match(newName);
+        if (nameValidationResult.Value.Length == 0 || newName.Length > 50 || newName.StartsWith("%") || newName.EndsWith("%") || newName.StartsWith(" ") || newName.EndsWith(" "))
+            throw new ArgumentException("The name is invalid");
+        if (RudimentaryTextFilter.Match(newName).Success)
+            throw new ArgumentException("The name is moderated");
+
+        await InTransaction(async _ =>
+        {
+            using var ec = ServiceProvider.GetOrCreate<EconomyService>(this);
+            await using var economyLock = await ec.AcquireEconomyLock(CreatorType.User, userIdPerformingAction);
+
+            var groupDetails = await GetGroupById(groupId);
+            if (string.Equals(groupDetails.name, newName, StringComparison.Ordinal))
+                return 0;
+
+            if (await IsGroupNameTaken(newName))
+                throw new ArgumentException("The name has been taken.");
+
+            var bal = await ec.GetUserRobux(userIdPerformingAction);
+            if (bal < 100)
+                throw new RobloxException(400, 3, "You do not have enough funds to rename this group");
+
+            await ec.DecrementCurrency(CreatorType.User, userIdPerformingAction, CurrencyType.Robux, 100);
+            await InsertAsync("user_transaction", new
+            {
+                type = PurchaseType.Purchase,
+                currency_type = CurrencyType.Robux,
+                amount = 100,
+                sub_type = TransactionSubType.GroupRename,
+                user_id_one = userIdPerformingAction,
+                user_id_two = 1,
+            });
+
+            await db.ExecuteAsync("UPDATE \"group\" SET name = :name, updated_at = :updated_at WHERE id = :gid", new
+            {
+                gid = groupId,
+                name = newName,
+                updated_at = DateTime.UtcNow,
+            });
+
+            await InsertAsync("group_audit_log", new
+            {
+                group_id = groupId,
+                user_id = userIdPerformingAction,
+                action = AuditActionType.Rename,
+                old_name = groupDetails.name,
+                new_name = newName,
+            });
+
+            return 0;
         });
     }
 

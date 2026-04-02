@@ -508,7 +508,7 @@
 				<Properties>
 					<CoordinateFrame name="CFrame">
 						<X>0</X>
-						<Y>0.5</Y>
+						<Y>1.0</Y>
 						<Z>0</Z>
 						<R00>1</R00>
 						<R01>0</R01>
@@ -599,7 +599,7 @@
 				<Properties>
 					<CoordinateFrame name="CFrame">
 						<X>0</X>
-						<Y>0.5</Y>
+						<Y>1.0</Y>
 						<Z>0</Z>
 						<R00>1</R00>
 						<R01>0</R01>

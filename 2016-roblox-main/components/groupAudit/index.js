@@ -50,6 +50,14 @@ const Description = ({actor, description, actionType}) => {
       </Link>
     </p>
   }
+  if (actionType === 'Rename') {
+    return <p className='mb-0'>
+      Renamed the group from "{description.OldName}" to "{description.NewName}".
+    </p>
+  }
+  if (actionType === 'Change Description') {
+    return 'Updated the group description.';
+  }
 
   if (actionType === 'Lock')
     return 'Locked the group.';

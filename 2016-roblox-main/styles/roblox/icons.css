@@ -261,6 +261,27 @@ a:hover .icon-nav-search-white {
 	background-position: 0 -448px;
 }
 
+html.dark .icon-default-navigation,
+html.dark .icon-nav-menu,
+html.dark .icon-nav-robux,
+html.dark .icon-nav-tix,
+html.dark .icon-nav-settings,
+html.dark .icon-nav-search,
+html.dark .icon-nav-home,
+html.dark .icon-nav-profile,
+html.dark .icon-nav-message,
+html.dark .icon-nav-friends,
+html.dark .icon-nav-charactercustomizer,
+html.dark .icon-nav-inventory,
+html.dark .icon-nav-trade,
+html.dark .icon-nav-group,
+html.dark .icon-nav-forum,
+html.dark .icon-nav-blog,
+html.dark .icon-nav-search-white,
+html.dark .icon-nav-shop {
+	background-image: url('/img/nav-dark.svg');
+}
+
 .icon-nav-shop:hover {
 	background-position: -28px -448px;
 }

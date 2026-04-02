@@ -15,7 +15,7 @@ game:GetService('ThumbnailGenerator').GraphicsMode = 2;
 HttpService.HttpEnabled = true;
 ScriptContext.ScriptsDisabled = true
 Lighting.Outlines = false
-ContentProvider:SetBaseUrl('http://localhost')
+ContentProvider:SetBaseUrl(baseURL)
 print(ContentProvider.BaseUrl)
 game:GetService("ContentProvider"):SetAssetUrl(baseURL .. "/Asset/")
 game:GetService("InsertService"):SetAssetUrl(baseURL .. "/Asset/?id=%d")

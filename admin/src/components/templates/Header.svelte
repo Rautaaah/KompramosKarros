@@ -39,7 +39,7 @@
 	<title>{title || 'Admin'}</title>
 </svelte:head>
 
-<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+<header class="navbar navbar-dark sticky-top admin-header flex-md-nowrap p-0 shadow">
 	<div class="d-flex justify-content-between w-100">
 		<div class="d-flex align-items-center">
 			<a class="navbar-brand px-3" href="/admin">
@@ -49,7 +49,7 @@
 		
 		<div class="d-flex align-items-center">
 			<button 
-				class="btn btn-sm btn-outline-secondary mx-2" 
+				class="btn btn-sm btn-outline-secondary mx-2 admin-theme-toggle" 
 				on:click={toggledark} 
 				title="Toggle Dark Theme"
 			>
@@ -70,9 +70,29 @@
 			
 			<ul class="navbar-nav px-3">
 				<li class="nav-item text-nowrap d-none d-md-block">
-					<a class="nav-link" href="/home">Back to BubbaBlox</a>
+					<a class="nav-link" href="/home">Back to Zekoro</a>
 				</li>
 			</ul>
 		</div>
 	</div>
 </header>
+
+<style>
+	.admin-header {
+		background: #2b5f9e;
+	}
+
+	.admin-theme-toggle {
+		border-color: rgba(255, 255, 255, 0.35);
+		color: #fff;
+	}
+
+	.admin-theme-toggle:hover {
+		background: rgba(255, 255, 255, 0.12);
+		color: #fff;
+	}
+
+	:global([data-bs-theme='dark'] .admin-header) {
+		background: #1f3554;
+	}
+</style>

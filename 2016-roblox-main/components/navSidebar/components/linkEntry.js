@@ -28,7 +28,7 @@ const useStyles = createUseStyles({
     paddingTop: '5px',
   },
   count: {
-    background: '#01a2fd',
+    background: '#2b5f9e',
     color: 'white',
     borderRadius: '10px',
     padding: '2px 7px',

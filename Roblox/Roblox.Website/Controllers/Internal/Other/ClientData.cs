@@ -134,7 +134,7 @@ namespace Roblox.Website.Controllers
 						break;
 
 					// Make this configurable in appsettyings
-					case "RCCServiceBubbleRev2021RCCIsSoTuff":
+					case "RCCServicemRyJ6IBUugRHOURiM2ABQvXb8yJTGSaDP6cVPAm0MzOqgu3x":
 						json = System.IO.Path.Combine(Configuration.JsonDataDirectory, "RCCService.json");
 						break;
 						

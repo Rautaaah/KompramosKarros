@@ -32,6 +32,7 @@ const AccountInfo = props => {
   const [is2020MenuEnabled, set2020MenuEnabled] = useState(false);
   const [avatarMenu, setAvatarMenu] = useState(getAvatarMenu());
   const [isLoading, setIsLoading] = useState(false);
+  const displayEmail = 'zekoro@revival.zaza';
 
   const cardStyles = useCardStyles();
   const s = useFormStyles();
@@ -76,7 +77,7 @@ const AccountInfo = props => {
         <p className={s.accountInfoLabel}>Password: <span className={s.accountInfoValue}>**********</span> <EditButton onClick={() => {
           store.setModal('CHANGE_PASSWORD');
         }}></EditButton></p>
-        <p className={s.accountInfoLabel}>Email Address: <span className={s.accountInfoValue}>{store.email}</span> <EditButton onClick={() => {
+        <p className={s.accountInfoLabel}>Email Address: <span className={s.accountInfoValue}>{displayEmail}</span> <EditButton onClick={() => {
           store.setModal('CHANGE_EMAIL');
         }}></EditButton></p>
       </div>
@@ -85,7 +86,7 @@ const AccountInfo = props => {
       <Subtitle>Personal</Subtitle>
       <div className={cardStyles.card + ' p-3'}>
         <textarea ref={descRef} className={s.descInput} rows={3} defaultValue={store.description}></textarea>
-        <p className='mb-0 font-size-12'>Do not provide any details that can be used to identify you outside ROBLOX.</p>
+        <p className='mb-0 font-size-12'>Do not provide any details that can be used to identify you outside Zekoro.</p>
         <div className='mt-1'>
           <div className='row'>
             <div className='col pe-0'>

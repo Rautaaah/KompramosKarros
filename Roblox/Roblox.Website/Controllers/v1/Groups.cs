@@ -518,6 +518,26 @@ public class GroupsControllerV1 : ControllerBase
         await services.groups.SetGroupDescription(groupId, request.description);
     }
 
+    [HttpPatch("groups/{groupId:long}/name")]
+    [HttpPost("groups/{groupId:long}/name")]
+    public async Task SetGroupName(long groupId, [Required, FromBody] SetNameRequest request)
+    {
+        FeatureCheck();
+        await CheckPermission(groupId, GroupPermission.Owner);
+        try
+        {
+            await services.groups.SetGroupName(groupId, request.name, safeUserSession.userId);
+        }
+        catch (ArgumentException e)
+        {
+            throw new BadRequestException(0, e.Message);
+        }
+        catch (RobloxException e) when (e.statusCode == 400)
+        {
+            throw new BadRequestException(e.errorCode, e.Message);
+        }
+    }
+
     [HttpDelete("groups/{groupId:long}/wall/posts/{postId:long}")]
     public async Task DeleteGroupWallPost(long groupId, long postId)
     {

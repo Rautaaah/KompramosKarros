@@ -1,4 +1,4 @@
-﻿@page "/internal/promocodes"
+@page "/internal/promocodes"
 @model Roblox.Website.Pages.Internal.Promocodes
 
 @{
@@ -6,77 +6,82 @@
 }
 
 @section MetaTags {
-    <title>Promocodes</title>
+    <title>Redeem Zekoro Promotions</title>
 }
 
-<div class="container mt-4 mb-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card card-body">
-                <h3>Promocodes</h3>
-                
+<div class="promo-page container">
+    <div class="promo-card">
+        <h1 class="promo-title">Redeem ZEKORO Promotions</h1>
+
+        <div class="promo-layout">
+            <section class="promo-info">
+                <h3>How to Use</h3>
+                <p>
+                    Have you received a ZEKORO promotional code from one of our many events or giveaways?
+                </p>
+                <p>
+                    This is the place to claim your goods. Enter the promotional code in the section to the right.
+                </p>
+                <p class="promo-note">
+                    Promotional codes may expire, or only be active for a short period of time.
+                </p>
+            </section>
+
+            <section class="promo-form-panel">
+                <h3>Enter Your Code:</h3>
+
                 @if (Model.Result != null && Model.Result.showResult)
                 {
                     @if (!Model.Result.success)
                     {
-                        <div class="alert alert-danger">@Model.Result.message</div>
+                        <div class="alert alert-danger promo-alert">@Model.Result.message</div>
                     }
                     else
                     {
-                        <div class="alert alert-success">@Model.Result.message</div>
-                        
+                        <div class="alert alert-success promo-alert">@Model.Result.message</div>
+
                         @if (Model.Result.assetId.HasValue)
                         {
-                            <div class="mt-3">
+                            <div class="promo-reward">
                                 <h4>You received:</h4>
-                                <div class="row">
-                                    <div class="col-6 col-md-4 col-lg-2 mb-2">
-                                        <div class="card">
-                                            <a href="/catalog/@Model.Result.assetId/--">
-                                                <img class="w-100 mx-auto" src="/thumbs/asset.ashx?assetId=@Model.Result.assetId"/>
-                                            </a>
-                                            <div class="card-body">
-                                                <p class="mb-0 fw-bolder text-truncate">@(Model.Result.name ?? "Unknown Item")</p>
-                                            </div>
-                                        </div>
+                                <div class="promo-reward-card">
+                                    <a href="/catalog/@Model.Result.assetId/--">
+                                        <img class="promo-reward-image" src="/thumbs/asset.ashx?assetId=@Model.Result.assetId" />
+                                    </a>
+                                    <div class="promo-reward-body">
+                                        <p class="promo-reward-name">@(Model.Result.name ?? "Unknown Item")</p>
                                     </div>
                                 </div>
                             </div>
                         }
-                        
+
                         @if (Model.Result.robux.HasValue)
                         {
-                            <div class="mt-3">
+                            <div class="promo-reward">
                                 <h4>You received:</h4>
-                                <div class="row">
-                                    <div class="col-6 col-md-4 col-lg-2 mb-2">
-                                        <div class="card">
-                                            <a href="#">
-                                                <img class="w-100 mx-auto" src="@($"{Roblox.Configuration.BaseUrl}/UnsecuredContent/robux.png")" />
-                                            </a>
-                                            <div class="card-body">
-                                                <p class="mb-0 fw-bolder text-truncate">@Model.Result.robux.Value.ToString("N0") Robux</p>
-                                            </div>
-                                        </div>
+                                <div class="promo-reward-card">
+                                    <img class="promo-reward-image" src="@($"{Roblox.Configuration.BaseUrl}/UnsecuredContent/robux.png")" />
+                                    <div class="promo-reward-body">
+                                        <p class="promo-reward-name">@Model.Result.robux.Value.ToString("N0") Robux</p>
                                     </div>
                                 </div>
                             </div>
                         }
                     }
                 }
-                
-                <form method="post" class="mt-3">
+
+                <form method="post" class="promo-form">
                     @Html.AntiForgeryToken()
-                    <div class="form-group">
-                        <input type="text" class="form-control" id="code" name="code" placeholder="Promocode" required>
-                        <span asp-validation-for="Code" class="text-danger"></span>
+                    <div class="promo-input-row">
+                        <input type="text" class="form-control promo-input" id="code" name="code" placeholder="Enter code" required />
+                        <button type="submit" class="btn promo-button" name="handler" value="redeem">
+                            <span id="submitText">Redeem</span>
+                            <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
                     </div>
-                    <button type="submit" class="btn btn-primary mt-2" name="handler" value="redeem">
-                        <span id="submitText">Redeem</span>
-                        <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                    </button>
+                    <span asp-validation-for="Code" class="text-danger"></span>
                 </form>
-            </div>
+            </section>
         </div>
     </div>
 </div>
@@ -87,10 +92,163 @@
             const submitBtn = document.querySelector('button[type="submit"]');
             const submitText = document.getElementById('submitText');
             const spinner = document.getElementById('spinner');
-            
+
             submitBtn.disabled = true;
             submitText.classList.add('d-none');
             spinner.classList.remove('d-none');
         });
     </script>
+}
+
+@section Styles {
+    <style>
+        .navbar-auth {
+            background: #2b5f9e !important;
+        }
+
+        .promo-page {
+            max-width: 980px;
+            padding-top: 34px;
+            padding-bottom: 42px;
+        }
+
+        .promo-card {
+            background: #fff;
+            padding: 0 8px;
+        }
+
+        .promo-title {
+            color: #1f2d3d;
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 18px;
+        }
+
+        .promo-layout {
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 0;
+            align-items: start;
+        }
+
+        .promo-info {
+            padding: 8px 34px 8px 0;
+            border-right: 1px solid #cfcfcf;
+            min-height: 180px;
+        }
+
+        .promo-info h3,
+        .promo-form-panel h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #222;
+        }
+
+        .promo-info p {
+            font-size: 15px;
+            line-height: 1.55;
+            color: #222;
+            margin-bottom: 18px;
+        }
+
+        .promo-note {
+            margin-top: 32px;
+        }
+
+        .promo-form-panel {
+            padding: 28px 0 8px 34px;
+        }
+
+        .promo-input-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            margin-bottom: 10px;
+        }
+
+        .promo-input {
+            max-width: 190px;
+            border-radius: 0;
+            border: 1px solid #888;
+            box-shadow: none;
+        }
+
+        .promo-button {
+            background: #148f1d;
+            color: #fff;
+            border-radius: 0;
+            border: 1px solid #0f7417;
+            font-weight: 700;
+            min-width: 88px;
+        }
+
+        .promo-button:hover,
+        .promo-button:focus {
+            background: #19a824;
+            color: #fff;
+        }
+
+        .promo-alert {
+            margin-bottom: 16px;
+        }
+
+        .promo-reward {
+            margin-top: 18px;
+        }
+
+        .promo-reward h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .promo-reward-card {
+            width: 180px;
+            border: 1px solid #ddd;
+            background: #fff;
+        }
+
+        .promo-reward-image {
+            width: 100%;
+            display: block;
+        }
+
+        .promo-reward-body {
+            padding: 10px 12px;
+        }
+
+        .promo-reward-name {
+            margin: 0;
+            font-weight: 600;
+            color: #222;
+        }
+
+        @@media (max-width: 767px) {
+            .promo-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .promo-info {
+                border-right: 0;
+                border-bottom: 1px solid #cfcfcf;
+                padding-right: 0;
+                padding-bottom: 24px;
+            }
+
+            .promo-form-panel {
+                padding-left: 0;
+                padding-top: 24px;
+            }
+
+            .promo-input-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .promo-input {
+                max-width: none;
+            }
+        }
+    </style>
 }

@@ -60,7 +60,7 @@ end
     HttpService.HttpEnabled = true
     ScriptContext.ScriptsDisabled = true
     Lighting.Outlines = false
-    ContentProvider:SetBaseUrl('http://localhost')
+    ContentProvider:SetBaseUrl(baseURL)
     game:GetService("ContentProvider"):SetAssetUrl(baseURL .. "/Asset/")
     game:GetService("InsertService"):SetAssetUrl(baseURL .. "/Asset/?id=%d")
     pcall(function() game:GetService("ScriptInformationProvider"):SetAssetUrl(url .. "/Asset/") end)

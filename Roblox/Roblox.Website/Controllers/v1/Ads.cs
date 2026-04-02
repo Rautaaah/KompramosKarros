@@ -58,6 +58,34 @@ public class AdsControllerV1 : ControllerBase
             throw new UnauthorizedException();
         }
     }
+    
+    [HttpPost("user-ads/game/create")]
+    public async Task CreateUserAdForGame([Required, FromQuery] long assetId, [Required, FromForm] CreateAdvertisementRequest request)
+    {
+        FeatureFlags.FeatureCheck(FeatureFlag.UserAdvertisingEnabled, FeatureFlag.UploadContentEnabled);
+        if (!await services.cooldown.TryCooldownCheck("CreateAdV1:" + safeUserSession.userId, TimeSpan.FromSeconds(5)))
+            throw new RobloxException(429, 0, "TooManyRequests");
+        
+        var targetAsset = await services.assets.GetAssetCatalogInfo(assetId);
+        if (targetAsset.assetType != Models.Assets.Type.Place)
+            throw new RobloxException(RobloxException.BadRequest, 0, "BadRequest");
+        
+        try
+        {
+            await services.assets.CreateAdvertisement(safeUserSession.userId, assetId, UserAdvertisementTargetType.Asset, request.name,
+                request.files.OpenReadStream());
+        }
+        catch (PermissionException)
+        {
+            throw new UnauthorizedException();
+        }
+    }
+
+    [HttpPost("user-ads/place/create")]
+    public Task CreateUserAdForPlace([Required, FromQuery] long assetId, [Required, FromForm] CreateAdvertisementRequest request)
+    {
+        return CreateUserAdForGame(assetId, request);
+    }
 
     [HttpPost("user-ads/{advertisementId:long}/run")]
     public async Task RunAd([Required] long advertisementId, [Required, FromBody] RunAdvertisementRequest request)

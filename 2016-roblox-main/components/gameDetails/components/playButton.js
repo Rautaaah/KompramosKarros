@@ -21,7 +21,23 @@ const useStyles = createUseStyles({
     color: '#ff0000',
     textAlign: 'center',
     marginBottom: '8px',
-  }
+  },
+  webPlayButton: {
+    width: '100%',
+    marginTop: '8px',
+    padding: '4px 8px',
+    border: '1px solid #8f8f8f',
+    background: '#f7f7f7',
+    color: '#1a1a1a',
+    cursor: 'pointer',
+    '&:hover': {
+      background: '#efefef',
+    },
+    '&:disabled': {
+      opacity: '0.5',
+      cursor: 'not-allowed',
+    },
+  },
 })
 
 /**
@@ -61,6 +77,15 @@ const PlayButton = props => {
     }
   }
 
+  const onWebPlayClick = () => {
+    if (!gameDetails.placeDetails?.isPlayable) return;
+    if (!auth.isAuthenticated) {
+      window.location.href = '/';
+      return;
+    }
+    window.location.href = `/webplayer/4883.html?placeId=${encodeURIComponent(props.placeId)}`;
+  }
+
   const isDisabled = !gameDetails.placeDetails?.isPlayable;
 
   return <div className='row'>
@@ -73,6 +98,9 @@ const PlayButton = props => {
         onClick={onClick}
         disabled={isDisabled}
       />
+      <button className={s.webPlayButton} onClick={onWebPlayClick} disabled={isDisabled}>
+        Play in Browser (Beta)
+      </button>
     </div>
   </div>
 }

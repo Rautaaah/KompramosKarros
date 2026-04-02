@@ -52,7 +52,7 @@ end
 
 local function reportplayer(userId, eventType)
 	local msg = {
-		authorization = "b6j5qgVXq3EWuzcyAY6um1rw7zCBOoa0Mw6IaSvuK3Tt1qL8lyr8KvB6xieegVuQ4Ncmb1PGknWjyYg7Yk8bT7fC3eA7kllS9dE45aEbucetKd4A9UfIvIJZQ7xp1hcV",
+		authorization = "mRyJ6IBUugRHOURiM2ABQvXb8yJTGSaDP6cVPAm0MzOqgu3x",
 		serverId = game.JobId,
 		userId = tostring(userId),
 		eventType = eventType,
@@ -65,7 +65,7 @@ local function pollToReportActivity()
 	--while serverOk do
 	while true do
 		local msg ={
-			authorization = "b6j5qgVXq3EWuzcyAY6um1rw7zCBOoa0Mw6IaSvuK3Tt1qL8lyr8KvB6xieegVuQ4Ncmb1PGknWjyYg7Yk8bT7fC3eA7kllS9dE45aEbucetKd4A9UfIvIJZQ7xp1hcV",
+			authorization = "mRyJ6IBUugRHOURiM2ABQvXb8yJTGSaDP6cVPAm0MzOqgu3x",
 			serverId = game.JobId,
 			placeId = placeId
 		}
@@ -77,7 +77,7 @@ end
 local function shutdown()
 	print("[info] Shutting down server")
 	local msg = {
-		authorization = "b6j5qgVXq3EWuzcyAY6um1rw7zCBOoa0Mw6IaSvuK3Tt1qL8lyr8KvB6xieegVuQ4Ncmb1PGknWjyYg7Yk8bT7fC3eA7kllS9dE45aEbucetKd4A9UfIvIJZQ7xp1hcV",
+		authorization = "mRyJ6IBUugRHOURiM2ABQvXb8yJTGSaDP6cVPAm0MzOqgu3x",
 		serverId = game.JobId,
 		placeId = placeId
 	}

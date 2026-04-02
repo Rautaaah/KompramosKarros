@@ -394,13 +394,41 @@ public class GameServerService : ServiceBase
 		return (DateTime)result.updated_at;
 	}
 
-    public async Task SetServerPing(string serverId)
+    public async Task SetServerPing(string serverId, long placeId = 0)
     {
+        var now = DateTime.UtcNow;
+        var hasGuid = Guid.TryParse(serverId, out _);
+
+        if (hasGuid)
+        {
+            var rows = await db.ExecuteAsync("UPDATE asset_server SET updated_at = :u WHERE id = :id::uuid", new
+            {
+                u = now,
+                id = serverId,
+            });
+
+            if (rows > 0) return;
+            Console.WriteLine($"[GS] ping update missed serverId={serverId}, placeId={placeId}");
+        }
+        else
+        {
+            Console.WriteLine($"[GS] ping received invalid serverId='{serverId}', placeId={placeId}");
+        }
+
+        if (placeId <= 0) return;
+
+        var fallbackId = await db.QueryFirstOrDefaultAsync<string>(
+            "SELECT id::text FROM asset_server WHERE asset_id = :placeId ORDER BY updated_at DESC LIMIT 1",
+            new { placeId });
+
+        if (string.IsNullOrEmpty(fallbackId)) return;
+
         await db.ExecuteAsync("UPDATE asset_server SET updated_at = :u WHERE id = :id::uuid", new
         {
-            u = DateTime.UtcNow,
-            id = serverId,
+            u = now,
+            id = fallbackId,
         });
+        Console.WriteLine($"[GS] ping fallback updated serverId={fallbackId} for placeId={placeId}");
     }
 	
 	public async Task<dynamic> GetStatus()
@@ -551,11 +579,26 @@ public class GameServerService : ServiceBase
 			
 			if (!ServerReady)
 			{
+				var createdAt = await db.QueryFirstOrDefaultAsync<DateTime?>(
+					"SELECT created_at FROM asset_server WHERE id = :id::uuid",
+					new { id = AvailableServer.id });
+				var hasLiveProcess = jobRccs.TryGetValue(AvailableServer.id, out var proc) && !proc.HasExited;
+				var isStale = createdAt.HasValue && (DateTime.UtcNow - createdAt.Value.ToUniversalTime()) > TimeSpan.FromSeconds(20);
+				if (!hasLiveProcess && isStale)
+				{
+					Console.WriteLine($"[GS] removing stale server row {AvailableServer.id} for place {placeId}");
+					await db.ExecuteAsync("DELETE FROM asset_server WHERE id = :id::uuid", new { id = AvailableServer.id });
+					currentGameServerPorts.TryRemove(AvailableServer.id, out _);
+					jobRccs.TryRemove(AvailableServer.id, out _);
+				}
+				else
+				{
 				// if server hasn't pinged yet, return Loading until it has
 				return new GameServerGetOrCreateResponse() 
 				{ 
 					status = JoinStatus.Loading
 				};
+				}
 			}
 			
 			if (!currentGameServerPorts.ContainsKey(AvailableServer.id))
@@ -673,7 +716,7 @@ public class GameServerService : ServiceBase
 			{
 				id = jobId,
 				asset_id = placeId,
-				ip = "games.zawg.ca",
+				ip = Configuration.GSIPAddress,
 				port = NSPort,
 				RCCConnection = $"127.0.0.1:{RCCPort}",
 			});
@@ -681,14 +724,25 @@ public class GameServerService : ServiceBase
 		Console.WriteLine($"[DEBUG] current GS ports: {string.Join(",", currentGameServerPorts.Select(kvp => $"{kvp.Key}:{kvp.Value}"))}");
 
 		Process rccServer = new Process();
-		rccServer.StartInfo.CreateNoWindow = false;
-		rccServer.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
-		rccServer.StartInfo.FileName = $"{Configuration.RccServicePath}RCCService.exe";
+		var rccExePath = Path.Combine(Configuration.RccServicePath, "RCCService.exe");
+		rccServer.StartInfo.CreateNoWindow = true;
+		rccServer.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+		rccServer.StartInfo.FileName = rccExePath;
+		rccServer.StartInfo.WorkingDirectory = Path.GetDirectoryName(rccExePath) ?? Configuration.RccServicePath;
 		rccServer.StartInfo.Arguments = string.Format($@"-console -verbose -port {RCCPort}");
 		rccServer.StartInfo.RedirectStandardError = false;
 		rccServer.StartInfo.RedirectStandardOutput = false;
-		rccServer.StartInfo.UseShellExecute = true;
-		rccServer.Start();
+		rccServer.StartInfo.UseShellExecute = false;
+		try
+		{
+			rccServer.Start();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"[GS] failed to start RCCService at {rccExePath}: {ex.Message}");
+			await db.ExecuteAsync("DELETE FROM asset_server WHERE id = :id::uuid", new { id = jobId });
+			return "BAD";
+		}
 
 		string originalScript = File.ReadAllText($"{Configuration.LuaScriptPath}GameServer.lua");
 		string finalScript = originalScript.Replace
@@ -769,7 +823,7 @@ public class GameServerService : ServiceBase
 			{
 				id = jobId,
 				asset_id = placeId,
-				ip = "games.zawg.ca",
+				ip = Configuration.GSIPAddress,
 				port = NSPort,
 				RCCConnection = $"127.0.0.1:{RCCPort}",
 			});
@@ -865,7 +919,7 @@ public class GameServerService : ServiceBase
 			{
 				id = jobId,
 				asset_id = placeId,
-				ip = "games.zawg.ca",
+				ip = Configuration.GSIPAddress,
 				port = NSPort,
 				RCCConnection = $"127.0.0.1:{RCCPort}",
 			});
@@ -962,7 +1016,7 @@ public class GameServerService : ServiceBase
 			{
 				id = jobId,
 				asset_id = placeId,
-				ip = "games.zawg.ca",
+				ip = Configuration.GSIPAddress,
 				port = NSPort,
 				RCCConnection = $"127.0.0.1:{RCCPort}",
 			});
@@ -992,7 +1046,7 @@ public class GameServerService : ServiceBase
 				""SessionId"": ""{Guid.NewGuid()}"",
 				""CreatorId"": {AssetCatalogInfo.creatorTargetId},
 				""GameId"": ""{jobId}"",
-				""MachineAddress"": ""games.zawg.ca"",
+				""MachineAddress"": ""{Configuration.GSIPAddress}"",
 				""GsmInterval"": 5,
 				""MaxPlayers"": {MaxPlayers},
 				""MaxGameInstances"": 1,
@@ -1099,7 +1153,7 @@ public class GameServerService : ServiceBase
 			{
 				id = jobId,
 				asset_id = placeId,
-				ip = "games.zawg.ca",
+				ip = Configuration.GSIPAddress,
 				port = NSPort,
 				RCCConnection = $"127.0.0.1:{RCCPort}",
 			});
@@ -1128,7 +1182,7 @@ public class GameServerService : ServiceBase
 				""SessionId"": ""{Guid.NewGuid()}"",
 				""CreatorId"": {AssetCatalogInfo.creatorTargetId},
 				""GameId"": ""{jobId}"",
-				""MachineAddress"": ""games.zawg.ca"",
+				""MachineAddress"": ""{Configuration.GSIPAddress}"",
 				""GsmInterval"": 5,
 				""MaxPlayers"": {MaxPlayers},
 				""MaxGameInstances"": 1,

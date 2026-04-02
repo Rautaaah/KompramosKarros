@@ -172,7 +172,9 @@ public class WebController : ControllerBase
         {
             case UserAdvertisementTargetType.Asset:
                 var itemData = await services.assets.GetAssetCatalogInfo(ad.targetId);
-                var redirectUrl = "/catalog/" + itemData.id + "/" + UrlUtilities.ConvertToSeoName(itemData.name);
+                var redirectUrl = itemData.assetType == Models.Assets.Type.Place
+                    ? "/games/" + itemData.id + "/" + UrlUtilities.ConvertToSeoName(itemData.name)
+                    : "/catalog/" + itemData.id + "/" + UrlUtilities.ConvertToSeoName(itemData.name);
                 return Redirect(redirectUrl);
             case UserAdvertisementTargetType.Group:
                 return Redirect("/My/Groups.aspx?gid=" + ad.targetId);

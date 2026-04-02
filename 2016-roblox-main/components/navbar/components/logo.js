@@ -3,21 +3,17 @@ import NavigationStore from "../../../stores/navigation";
 
 const useLogoStyles = createUseStyles({
   imgDesktop: {
-    width: '118px',
-    height: '30px',
-    backgroundImage: `url(/img/bb_logo.png)`,
-    backgroundSize: '118px 30px',
+    width: '168px',
+    height: '34px',
     display: 'none',
     '@media(min-width: 1301px)': {
       display: 'block',
     },
   },
   imgMobile: {
-    backgroundImage: `url(/img/logo_bb.png)`,
     width: '30px',
     height: '30px',
     display: 'block',
-    backgroundSize: '30px',
     '@media(min-width: 1301px)': {
       display: 'none',
     },
@@ -26,7 +22,7 @@ const useLogoStyles = createUseStyles({
     marginLeft: '40px',
   },
   col: {
-    maxWidth: '140px',
+    maxWidth: '190px',
   },
   openSideNavMobile: {
     display: 'none',
@@ -47,9 +43,9 @@ const Logo = () => {
     <div className={s.openSideNavMobile + ' icon-menu'} onClick={() => {
       navStore.setIsSidebarOpen(!navStore.isSidebarOpen);
     }}></div>
-    <div className={s.imgDesktop}></div>
+    <img className={s.imgDesktop} src='/img/zekoro_logo.png' alt='Zekoro' />
     <div className={s.imgMobileWrapper}>
-      <div className={s.imgMobile}></div>
+      <img className={s.imgMobile} src='/img/favicon.png' alt='Zekoro' />
     </div>
   </div>
 }

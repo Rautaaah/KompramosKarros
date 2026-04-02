@@ -3,6 +3,7 @@ import { createUseStyles } from "react-jss";
 import { followUser, unfollowUser } from "../../../services/friends";
 import { multiGetPresence } from "../../../services/presence";
 import {getMembershipType, updateStatus} from "../../../services/users";
+import { getUserCollectibleRapTotal } from "../../../services/collectibles";
 import AuthenticationStore from "../../../stores/authentication";
 import Dropdown2016 from "../../dropdown2016";
 import PlayerHeadshot from "../../playerHeadshot";
@@ -33,6 +34,7 @@ const useHeaderStyles = createUseStyles({
   },
   dropdown: {
     float: 'right',
+    marginTop: '-10px',
   },
   updateStatusInput: {
     width: 'calc(100% - 140px)',
@@ -65,11 +67,13 @@ const ProfileHeader = props => {
   const [editStatus, setEditStatus] = useState(false);
   const [status, setStatus] = useState(null);
   const [bcLevel, setBcLevel] = useState(0);
+  const [collectiblesRap, setCollectiblesRap] = useState(null);
 
   useEffect(() => {
     // reset
     setStatus(null);
     setBcLevel(0);
+    setCollectiblesRap(null);
     setEditStatus(false);
     setDropdownOptions(null);
 
@@ -86,6 +90,11 @@ const ProfileHeader = props => {
     }).catch(e => {
       // can fail when not logged in :(
     })
+    getUserCollectibleRapTotal({ userId: store.userId }).then(total => {
+      setCollectiblesRap(total);
+    }).catch(() => {
+      setCollectiblesRap(0);
+    });
     const buttons = [];
     const isOwnProfile = auth.userId == store.userId;
     if (isOwnProfile) {
@@ -129,7 +138,7 @@ const ProfileHeader = props => {
     });
     buttons.push({
       name: 'Collectibles',
-      url: `https://collectibles.zawg.ca?user=${store.userId}`,
+      url: `/users/${store.userId}/inventory?view=collectibles`,
     });
     if (!isOwnProfile) {
       buttons.push({
@@ -209,9 +218,10 @@ const ProfileHeader = props => {
                 <RelationshipStatistics id='friends' label='Friends' value={store.friends?.length} userId={store.userId}/>
                 <RelationshipStatistics id='followers' label='Followers' value={store.followersCount} userId={store.userId}/>
                 <RelationshipStatistics id='followings' label='Following' value={store.followingsCount} userId={store.userId}/>
+                <RelationshipStatistics label='RAP' value={collectiblesRap} userId={store.userId} href={`/users/${store.userId}/collectibles`} />
                 {
                   showButtons && <>
-                    <div className='col-6 col-lg-2 offset-lg-2 pe-1'>
+                    <div className='col-6 col-lg-2 pe-1'>
                       <MessageButton/>
                     </div>
                     <div className='col-6 col-lg-2 ps-1'>

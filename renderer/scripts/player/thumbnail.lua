@@ -20,10 +20,10 @@ game:GetService('ThumbnailGenerator').GraphicsMode = 2;
 HttpService.HttpEnabled = true;
 ScriptContext.ScriptsDisabled = true;
 Lighting.Outlines = false;
-ContentProvider:SetBaseUrl("http://localhost/");
+ContentProvider:SetBaseUrl(baseURL .. "/");
 
-Insert:SetAssetUrl("http://localhost/asset/?id=%d");
-Insert:SetAssetVersionUrl("http://localhost/Asset/?assetversionid=%d");
+Insert:SetAssetUrl(baseURL .. "/asset/?id=%d");
+Insert:SetAssetVersionUrl(baseURL .. "/Asset/?assetversionid=%d");
 
 local function applyMesh(Player, children, limb)
     print("[DEBUG] applying mesh to:", limb);

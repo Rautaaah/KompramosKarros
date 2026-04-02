@@ -47,10 +47,26 @@ const useStyles = createUseStyles({
     position: 'relative',
   },
   friendCard: {
-
+    position: 'relative',
   },
   friendCardWrapper: {
     boxShadow: '0 1px 4px 0 rgb(25 25 25 / 30%)',
+  },
+  friendInfo: {
+    paddingRight: '40px',
+  },
+  friendMenu: {
+    position: 'absolute',
+    top: '-2px',
+    right: '6px',
+    fontSize: '30px',
+    lineHeight: 1,
+    zIndex: 2,
+    '& button': {
+      width: '20px',
+      height: '20px',
+      borderRadius: 0,
+    },
   },
   buttonShared: {
     fontSize: '16px',
@@ -116,7 +132,7 @@ const UserFriends = props => {
       getFollowersCount({
         userId: store.userId,
       }).then(setFollowCount);
-    } else if (tab === 'Followings') {
+    } else if (tab === 'Following') {
       getFollowingsCount({
         userId: store.userId,
       }).then(setFollowCount);
@@ -135,7 +151,7 @@ const UserFriends = props => {
         cursor,
         limit,
       }).then(setFollowEntries);
-    } else if (tab === 'Followings') {
+    } else if (tab === 'Following') {
       getFollowings({
         userId: store.userId,
         cursor,
@@ -171,7 +187,7 @@ const UserFriends = props => {
 
   const arrayToUse = (tab === 'Friends' ? friends.slice((page - 1) * limit, page * limit) : followEntries && followEntries.data);
   const pageCount = Math.ceil((tab === 'Friends' ? friends.length : followCount) / limit);
-  const options = ['Friends', 'Followers', 'Followings'];
+  const options = ['Friends', 'Followers', 'Following'];
   if (store.userId === auth.userId) {
     options.unshift('Friend Requests');
   }
@@ -210,11 +226,34 @@ const UserFriends = props => {
     <div className='row mt-2'>
       {
         arrayToUse && arrayToUse.map(v => {
-          const canRemoveUser = (tab === 'Friends' || tab === 'Followings') && v.isDeleted && store.userId === auth.userId;
+          const canRemoveUser = store.userId === auth.userId && (tab === 'Friends' || tab === 'Following');
 
           return <div className={'col-12 col-md-6 col-lg-4 mb-4'} key={v.id}>
             <div className={s.friendCardWrapper}>
               <div className={'card ' + s.friendCard}>
+                    {
+                      canRemoveUser ? <div className={s.friendMenu + ' text-dark'}>
+                        <Dropdown2016 options={[
+                          {
+                            name: tab === 'Friends' ? 'Unfriend' : 'Unfollow',
+                            onClick: e => {
+                              e.stopPropagation();
+                              e.preventDefault();
+
+                              if (tab === 'Friends') {
+                                unfriendUser({userId: v.id}).then(() => {
+                                  window.location.reload();
+                                });
+                              }else{
+                                unfollowUser({userId: v.id}).then(() => {
+                                  window.location.reload();
+                                })
+                              }
+                            },
+                          },
+                        ]} />
+                      </div> : null
+                    }
                     <div className='row p-2'>
                       <div className='col-4'>
                         <div className={s.imageWrapper}>
@@ -225,7 +264,7 @@ const UserFriends = props => {
                           </Link>
                         </div>
                       </div>
-                      <div className='col-8'>
+                      <div className={'col-8 ' + s.friendInfo}>
                         <div className='d-inline-block'>
                           <p className={'mb-0 font-size-18 ' + s.username}>
                             <Link href={`/users/${v.id}/profile`}>
@@ -235,30 +274,6 @@ const UserFriends = props => {
                             </Link>
                           </p>
                         </div>
-                        {
-                          (canRemoveUser || tab == "Followings") ? <div className='d-inline-block float-end font-size-30 text-dark'>
-                            <Dropdown2016 options={[
-                              {
-                                name: tab === 'Friends' ? 'Remove' : 'Unfollow',
-                                onClick: e => {
-                                  e.stopPropagation();
-                                  e.preventDefault();
-
-                                  if (tab === 'Friends') {
-                                    unfriendUser({userId: v.id}).then(() => {
-                                      window.location.reload();
-                                    });
-                                  }else{
-                                    // remove follower
-                                    unfollowUser({userId: v.id}).then(() => {
-                                      window.location.reload();
-                                    })
-                                  }
-                                },
-                              },
-                            ]} />
-                          </div> : null
-                        }
                       </div>
                     </div>
               </div>

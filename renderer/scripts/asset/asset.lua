@@ -20,13 +20,13 @@ game:GetService("ThumbnailGenerator").GraphicsMode = 2
 HttpService.HttpEnabled = true
 ScriptContext.ScriptsDisabled = true
 Lighting.Outlines = false
-ContentProvider:SetBaseUrl("http://localhost")
+ContentProvider:SetBaseUrl(baseURL)
 
 local function makechar()
     print("[DEBUG] creating R6 char")
     local player = Players:CreateLocalPlayer(1)
 	-- is this necessary?
-    player.CharacterAppearance = "http://localhost/asset/?id=27111419"
+    player.CharacterAppearance = baseURL .. "/asset/?id=27111419"
     player:LoadCharacter()
     local character = player.Character or player.CharacterAdded:Wait()
     character.Parent = workspace
@@ -169,7 +169,19 @@ local function render()
 		camera.FieldOfView = thumbcamera.FieldOfView
 		camera.CameraType = thumbcamera.CameraType
 	else
-		print("[DEBUG] no ThumbnailCamera found, using default position")
+		print("[DEBUG] no ThumbnailCamera found, calculating fallback camera")
+		local modelCFrame = model:GetModelCFrame()
+		local modelSize = model:GetExtentsSize()
+		local target = modelCFrame.p
+		local maxDimension = math.max(modelSize.X, modelSize.Y, modelSize.Z)
+		local distance = math.max(6, maxDimension * 1.75)
+		local heightOffset = math.max(1.5, modelSize.Y * 0.35)
+		local offset = Vector3.new(distance * 0.75, heightOffset, distance)
+
+		camera.FieldOfView = 35
+		camera.CameraType = Enum.CameraType.Fixed
+		camera.CFrame = CFrame.new(target + offset, target)
+		camera.Focus = CFrame.new(target)
 	end
 	workspace.CurrentCamera = camera
 	camera.Parent = model

@@ -6,6 +6,7 @@ import { abbreviateNumber } from "../../../lib/numberUtils";
 import { logout } from "../../../services/auth";
 import AuthenticationStore from "../../../stores/authentication";
 import Link from "../../link";
+import { getTheme, themeType } from "../../../services/theme";
 
 const useDropdownStyles = createUseStyles({
   wrapper: {
@@ -23,7 +24,7 @@ const useDropdownStyles = createUseStyles({
     fontSize: '16px',
     '&:hover': {
       background: '#eaeaea',
-      borderLeft: '4px solid #0074BD',
+      borderLeft: '4px solid #2b5f9e',
     },
     '&:hover > a': {
       marginLeft: '-4px',
@@ -62,7 +63,7 @@ const SettingsDropdown = props => {
 
 const useLoginAreaStyles = createUseStyles({
   text: {
-    color: 'white',
+    color: p => p.theme === themeType.obc2016 ? 'white' : 'white',
     fontWeight: 400,
     fontSize: '16px',
     borderBottom: 0,
@@ -73,11 +74,11 @@ const useLoginAreaStyles = createUseStyles({
     display: 'inline',
   },
   link: {
-    color: 'white',
+    color: p => p.theme === themeType.obc2016 ? 'white' : 'white',
     textDecoration: 'none',
     padding: '4px 8px',
     '&:hover': {
-      color: 'white',
+      color: p => p.theme === themeType.obc2016 ? 'white' : 'white',
       background: 'rgba(25,25,25,0.1)',
       cursor: 'pointer',
       borderRadius: '4px',
@@ -99,7 +100,9 @@ const useLoginAreaStyles = createUseStyles({
 });
 
 const LoggedInArea = props => {
-  const s = useLoginAreaStyles();
+  const s = useLoginAreaStyles({
+    theme: getTheme(),
+  });
   const authStore = AuthenticationStore.useContainer();
   const [settingsOpen, setSettingsOpen] = useState(false);
 
